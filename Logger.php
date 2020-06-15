@@ -98,7 +98,7 @@ class Logger {
     }
 }
 
-$logger = new Logger(__DIR__.'/test.log');
+$logger = new Logger(__DIR__ . '/logs/test.log');
 
 //var_dump($logger->getFile());
 //var_dump($logger->getLast());

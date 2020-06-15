@@ -70,7 +70,7 @@ class testByRefGenerator implements  IteratorAggregate {
 //
 function step1()
 {
-    $f = fopen("file0.txt", 'r');
+    $f = fopen("genfiles/file0.txt", 'r');
     while ($line = fgets($f)) {
         echo $line;
         yield $line;
@@ -79,7 +79,7 @@ function step1()
 
 function step2()
 {
-    $f = fopen("file1.txt", 'r');
+    $f = fopen("genfiles/file1.txt", 'r');
     while ($line = fgets($f)) {
         yield $line;
     }
@@ -87,7 +87,7 @@ function step2()
 
 function step3()
 {
-    $f = fopen("file2.txt", 'r');
+    $f = fopen("genfiles/file2.txt", 'r');
     while ($line = fgets($f)) {
         yield $line;
     }
