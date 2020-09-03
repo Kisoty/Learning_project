@@ -28,15 +28,16 @@ class Logger
     /**
      * Write data into file
      * @param $data
+     * @param bool $show_file
      * @param string $tz_id
      * @return bool
      */
-    public function write($data, string $tz_id = 'UTC'): bool
+    public function write($data, bool $show_file = false, string $tz_id = 'UTC'): bool
     {
         if(!date_default_timezone_set($tz_id))
             date_default_timezone_set('UTC');
 
-        $input = __FILE__ . ' ' . date('h:i:s Y-m-d') . ': ' . print_r($data, true);
+        $input = '[' . ($show_file? __FILE__ . ' ' : '') . date('h:i:s Y-m-d') . ']' . PHP_EOL . print_r($data, true);
 
         if(!(file_put_contents($this->file, $input . PHP_EOL, FILE_APPEND | LOCK_EX) === false)) {
             $this->last_insert = $input;
@@ -116,8 +117,8 @@ class Logger
     }
 }
 
-//$logger = new Logger(__DIR__ . '/logs/test.log');
+$logger = new Logger(__DIR__ . '/logs/test.log');
 //$a = new Logger(__DIR__ . '/logs/test1.log');
-//$a->write('asdsad');
-//var_dump($logger->write(json_encode(['a' => 'anthem', 'b' => 'bulwark', 'c' => 'carolina']),'Europe/Moscow'));
+$logger->write('asdsad');
+$logger->write(['a' => 'anthem', 'b' => 'bulwark', 'c' => 'carolina'], true,'Europe/Moscow');
 //var_dump($logger->getLastInsert());
