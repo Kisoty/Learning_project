@@ -4,13 +4,14 @@ namespace App;
 /**
  * Realizes logging into given file and working with that file
  */
-class Logger {
+class Logger
+{
     private string $file;
 
     public function __construct(string $file)
     {
         if (!file_exists($file)) {
-            $dirArr = explode('/',$file);
+            $dirArr = explode('/', $file);
             array_pop($dirArr);
             $dir = '';
             foreach ($dirArr as $value) {
@@ -29,28 +30,29 @@ class Logger {
      * @param string $tz_id
      * @return bool
      */
-    public function write(string $data, string $tz_id = 'UTC')
+    public function write(string $data, string $tz_id = 'UTC'): bool
     {
         date_default_timezone_set($tz_id);
-        $data = __FILE__.' '.date('h:i:s Y-m-d').': '.$data;
-        return file_put_contents($this->file,$data.PHP_EOL, FILE_APPEND|LOCK_EX) === false? false : true;
+        $data = __FILE__ . ' ' . date('h:i:s Y-m-d') . ': ' . $data;
+        return file_put_contents($this->file, $data . PHP_EOL, FILE_APPEND | LOCK_EX) === false ? false : true;
     }
 
     /**
      * Gets current file name or false if none
-     * @return string|false
+     * @return string|null
      */
-    public function getFile() {
-        return $this->file? $this->file : false;
+    public function getFile(): ?string
+    {
+        return $this->file ? $this->file : null;
     }
 
     /**
      * Gets last $lines lines from file
      * @param int $lines
      * @param int $buffer
-     * @return false|string
+     * @return string
      */
-    public function getLast(int $lines = 1, int $buffer = 4096)
+    public function getLast(int $lines = 1, int $buffer = 4096): ?string
     {
         // Open the file
         $f = fopen($this->file, "rb");
@@ -60,15 +62,15 @@ class Logger {
 
         // Read it and adjust line number if necessary
         // (Otherwise the result would be wrong if file doesn't end with a blank line)
-        if($a = fread($f, 1) != "\n") $lines -= 1;
+        if ($a = fread($f, 1) != "\n")
+            $lines -= 1;
 
         // Start reading
         $output = '';
         $chunk = '';
 
         // While we would like more
-        while(ftell($f) > 0 && $lines >= 0)
-        {
+        while (ftell($f) > 0 && $lines >= 0) {
             // Figure out how far back we should jump
             $seek = min(ftell($f), $buffer);
 
@@ -76,7 +78,7 @@ class Logger {
             fseek($f, -$seek, SEEK_CUR);
 
             // Read a chunk and prepend it to our output
-            $output = ($chunk = fread($f, $seek)).$output;
+            $output = ($chunk = fread($f, $seek)) . $output;
             // Jump back to where we started reading
             fseek($f, -mb_strlen($chunk, '8bit'), SEEK_CUR);
 
@@ -86,15 +88,14 @@ class Logger {
 
         // While we have too many lines
         // (Because of buffer size we might have read too many)
-        while($lines++ < 0)
-        {
+        while ($lines++ < 0) {
             // Find first newline and remove all text before that
             $output = substr($output, strpos($output, "\n") + 1);
         }
 
         // Close file and return
         fclose($f);
-        return $output;
+        return $output ?? null;
     }
 }
 
