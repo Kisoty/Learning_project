@@ -7,6 +7,7 @@ namespace App;
 class Logger
 {
     private string $file;
+    private string $last_insert = '';
 
     public function __construct(string $file)
     {
@@ -26,19 +27,26 @@ class Logger
 
     /**
      * Write data into file
-     * @param string $data
+     * @param $data
      * @param string $tz_id
      * @return bool
      */
-    public function write(string $data, string $tz_id = 'UTC'): bool
+    public function write($data, string $tz_id = 'UTC'): bool
     {
-        date_default_timezone_set($tz_id);
-        $data = __FILE__ . ' ' . date('h:i:s Y-m-d') . ': ' . $data;
-        return file_put_contents($this->file, $data . PHP_EOL, FILE_APPEND | LOCK_EX) === false ? false : true;
+        if(!date_default_timezone_set($tz_id))
+            date_default_timezone_set('UTC');
+
+        $input = __FILE__ . ' ' . date('h:i:s Y-m-d') . ': ' . print_r($data, true);
+
+        if(!(file_put_contents($this->file, $input . PHP_EOL, FILE_APPEND | LOCK_EX) === false)) {
+            $this->last_insert = $input;
+            return  true;
+        } else
+            return false;
     }
 
     /**
-     * Gets current file name or false if none
+     * Gets current file name or none
      * @return string|null
      */
     public function getFile(): ?string
@@ -47,12 +55,21 @@ class Logger
     }
 
     /**
+     * Gets last insert into file
+     * @return string
+     */
+    public function getLastInsert(): ?string
+    {
+        return $this->last_insert;
+    }
+
+    /**
      * Gets last $lines lines from file
      * @param int $lines
      * @param int $buffer
      * @return string
      */
-    public function getLast(int $lines = 1, int $buffer = 4096): ?string
+    public function getLastLines(int $lines = 1, int $buffer = 4096): ?string
     {
         // Open the file
         $f = fopen($this->file, "rb");
@@ -99,10 +116,8 @@ class Logger
     }
 }
 
-$logger = new Logger(__DIR__ . '/logs/test.log');
-
-//var_dump($logger->getFile());
-//var_dump($logger->getLast());
-//
-//var_dump($logger->write('AAA','Europe/Moscow'));
-//$logger->write('LULULUL');
+//$logger = new Logger(__DIR__ . '/logs/test.log');
+//$a = new Logger(__DIR__ . '/logs/test1.log');
+//$a->write('asdsad');
+//var_dump($logger->write(json_encode(['a' => 'anthem', 'b' => 'bulwark', 'c' => 'carolina']),'Europe/Moscow'));
+//var_dump($logger->getLastInsert());
